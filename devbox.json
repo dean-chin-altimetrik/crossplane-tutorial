@@ -7,12 +7,13 @@
     "kubectl@1.29.3",
     "gum@0.13.0",
     "awscli2@2.15.15",
-    "path:gcloud#google-cloud-sdk",
+    // "path:gcloud#google-cloud-sdk",
     "yq-go@4.43.1",
     "crossplane-cli@1.15.1",
-    "azure-cli@2.60.0",
+    // "azure-cli@2.60.0",
     "viddy@0.4.0",
-    "teller@2.0.7"
+    "teller@2.0.7",
+    "git@2.48.1"
   ],
   "shell": {
     "init_hook": [

@@ -141,13 +141,6 @@ aws_secret_access_key = $AWS_SECRET_ACCESS_KEY
 " > aws-creds.conf
     fi
 
-    kubectl --namespace crossplane-system \
-        create secret generic aws-creds \
-        --from-file creds=./aws-creds.conf \
-        --dry-run=client -o yaml | kubectl apply -f -
-
-    kubectl apply --filename providers/aws-config.yaml
-
 else
 
     AZURE_TENANT_ID=$(gum input --placeholder "Azure Tenant ID" --value "$AZURE_TENANT_ID")

@@ -138,23 +138,45 @@ spec:
 
 elif [[ "$HYPERSCALER" == "aws" ]]; then
 
-    AWS_ACCESS_KEY_ID=$(gum input --placeholder "AWS Access Key ID" --value "$AWS_ACCESS_KEY_ID")
-    echo "export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env
-    
-    AWS_SECRET_ACCESS_KEY=$(gum input --placeholder "AWS Secret Access Key" --value "$AWS_SECRET_ACCESS_KEY" --password)
-    echo "export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
+    if [[ -f "./aws-creds.conf" ]]; then
+        USE_EXISTING=$(gum choose "Use existing AWS creds" "Update AWS creds")
+        if [[ "$USE_EXISTING" == "Use existing AWS creds" ]]; then
+            echo "Reusing existing aws-creds.conf"
+        else
+            AWS_ACCESS_KEY_ID=$(gum input --placeholder "AWS Access Key ID" --value "$AWS_ACCESS_KEY_ID")
+            echo "export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env
+            
+            AWS_SECRET_ACCESS_KEY=$(gum input --placeholder "AWS Secret Access Key" --value "$AWS_SECRET_ACCESS_KEY" --password)
+            echo "export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
 
-    AWS_ACCOUNT_ID=$(gum input --placeholder "AWS Account ID" --value "$AWS_ACCOUNT_ID")
-    echo "export AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> .env
+            AWS_ACCOUNT_ID=$(gum input --placeholder "AWS Account ID" --value "$AWS_ACCOUNT_ID")
+            echo "export AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> .env
 
-    echo "[default]
+            echo "[default]
 aws_access_key_id = $AWS_ACCESS_KEY_ID
 aws_secret_access_key = $AWS_SECRET_ACCESS_KEY
-" >aws-creds.conf
+" > aws-creds.conf
+        fi
+    else
+        AWS_ACCESS_KEY_ID=$(gum input --placeholder "AWS Access Key ID" --value "$AWS_ACCESS_KEY_ID")
+        echo "export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env
+
+        AWS_SECRET_ACCESS_KEY=$(gum input --placeholder "AWS Secret Access Key" --value "$AWS_SECRET_ACCESS_KEY" --password)
+        echo "export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
+
+        AWS_ACCOUNT_ID=$(gum input --placeholder "AWS Account ID" --value "$AWS_ACCOUNT_ID")
+        echo "export AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> .env
+
+        echo "[default]
+aws_access_key_id = $AWS_ACCESS_KEY_ID
+aws_secret_access_key = $AWS_SECRET_ACCESS_KEY
+" > aws-creds.conf
+    fi
 
     kubectl --namespace crossplane-system \
         create secret generic aws-creds \
-        --from-file creds=./aws-creds.conf
+        --from-file creds=./aws-creds.conf \
+        --dry-run=client -o yaml | kubectl apply -f -
 
     kubectl apply --filename providers/aws-config.yaml
 

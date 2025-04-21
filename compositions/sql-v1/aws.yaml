@@ -21,6 +21,13 @@ spec:
           cidrBlock: 11.0.0.0/16
           enableDnsSupport: true
           enableDnsHostnames: true
+          tags:
+          - key: Enviroment
+            value: Development
+          - key: Project
+            value: DEP-DEMO
+          - key: Owner
+            value: dchin@altimetrik.com          
   - name: subnet-a
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
@@ -193,7 +200,7 @@ spec:
               crossplane.io/composite: my-db
   - name: rdsinstance
     base:
-      apiVersion: rds.aws.upbound.io/v1beta1
+      apiVersion: rds.aws.upbound.io/v1beta3
       kind: Instance
       spec:
         forProvider:
@@ -207,7 +214,7 @@ spec:
           instanceClass: db.m5.large
           username: masteruser
           engine: postgres
-          engineVersion: "16.2"
+          engineVersion: "16.6"
           skipFinalSnapshot: true
           publiclyAccessible: true
           allocatedStorage: 200
@@ -215,3 +222,10 @@ spec:
             namespace: crossplane-system
             key: password
             name: my-db-password
+          tags:
+          - key: Enviroment
+            value: Development
+          - key: Project
+            value: DEP-DEMO
+          - key: Owner
+            value: dchin@altimetrik.com

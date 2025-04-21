@@ -28,6 +28,13 @@ spec:
           cidrBlock: 11.0.0.0/16
           enableDnsSupport: true
           enableDnsHostnames: true
+          tags:
+          - key: Enviroment
+            value: Development
+          - key: Project
+            value: DEP-DEMO
+          - key: Owner
+            value: dchin@altimetrik.com           
     patches:
     - type: PatchSet
       patchSetName: metadata

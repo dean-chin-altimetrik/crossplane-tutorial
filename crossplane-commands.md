@@ -12,3 +12,4 @@ This is a compilation for good to know crossplane commands
 | `kubectl get xrds` | Get composite resource definitions | |
 | `kubectl explain <xrd_name>> --recursive` | Show schemas and explain xrd | `kubectl explain sqls.devopstoolkitseries.com --recursive`|
 | `kubectl get compositions` | Get Crossplane Compositions ||
+| `kubectl patch <type> <name> '{"metadata":{"finalizers":[]}}' --type=merge` | Force Delete by removing finalizers | `kubectl patch instance.rds.aws.upbound.io my-db -p '{"metadata":{"finalizers":[]}}' --type=merge` |

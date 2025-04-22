@@ -3,9 +3,6 @@ apiVersion: devopstoolkitseries.com/v1alpha1
 kind: ClusterClaim
 metadata:
   name: cluster-01
-  labels:
-    Owner: dchin@altimetrik.com
-    Project: DEP-DEMO
 spec:
   id: cluster-01
   compositionSelector:

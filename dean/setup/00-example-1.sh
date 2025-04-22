@@ -68,10 +68,10 @@ gum spin --spinner dot \
 kubectl wait --for=condition=healthy provider.pkg.crossplane.io \
     --all --timeout=1800s
 
-echo "## Which Hyperscaler do you want to use?" | gum format
+# echo "## Which Hyperscaler do you want to use?" | gum format
 
-HYPERSCALER=$(gum choose "google" "aws" "azure")
-
+# HYPERSCALER=$(gum choose "google" "aws" "azure")
+HYPERSCALER="aws"
 echo "export HYPERSCALER=$HYPERSCALER" >> .env
 
 if [[ "$HYPERSCALER" == "google" ]]; then
@@ -135,7 +135,8 @@ spec:
 elif [[ "$HYPERSCALER" == "aws" ]]; then
 
     if [[ -f "./aws-creds.conf" ]]; then
-        USE_EXISTING=$(gum choose "Use existing AWS creds" "Update AWS creds")
+        # USE_EXISTING=$(gum choose "Use existing AWS creds" "Update AWS creds")
+        USE_EXISTING="Use existing AWS creds"
         if [[ "$USE_EXISTING" == "Use existing AWS creds" ]]; then
             echo "Reusing existing aws-creds.conf"
         else

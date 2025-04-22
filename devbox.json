@@ -5,6 +5,7 @@
     "kind@0.22.0",
     "kubernetes-helm@3.14.3",
     "kubectl@1.29.3",
+    "kubectl-neat@2.0.3",
     "gum@0.13.0",
     "awscli2@2.15.15",
     // "path:gcloud#google-cloud-sdk",

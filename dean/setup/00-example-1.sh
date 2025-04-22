@@ -54,7 +54,7 @@ helm upgrade --install crossplane crossplane \
 
 # Apply all required packages
 kubectl apply -f dean/packages/runtimeconfig-provider-aws.yaml
-kubectl apply -f dean/packages/provider-aws.yaml
+kubectl apply -f dean/packages/providers-aws-upbound.yaml
 kubectl apply -f dean/packages/function-tag-manager.yaml
 kubectl apply -f dean/packages/function-go-templating.yaml
 kubectl apply -f dean/packages/function-patch-and-transform.yaml

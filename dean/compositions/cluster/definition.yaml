@@ -1,9 +1,9 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
+  name: compositeclusters.altimetrik.com
   labels:
     idp: "true"
-  name: compositeclusters.altimetrik.com
 spec:
   claimNames:
     kind: ClusterClaim
@@ -34,6 +34,7 @@ spec:
     referenceable: true
     schema:
       openAPIV3Schema:
+        description: Composite resource definition for provisioning Kubernetes clusters.
         properties:
           spec:
             properties:
@@ -44,6 +45,7 @@ spec:
                 description: Parameters used to customize the cluster
                 properties:
                   apps:
+                    type: object
                     description: List of apps that should be installed in the cluster
                     properties:
                       crossplane:
@@ -145,7 +147,6 @@ spec:
                             default: false
                             type: boolean
                         type: object
-                    type: object
                   creds:
                     description: The secret with hyperscaler credentials.
                     properties:

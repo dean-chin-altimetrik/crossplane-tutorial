@@ -47,17 +47,20 @@ kubectl apply \
 # Crossplane #
 ##############
 
+# Install Crossplane
 helm upgrade --install crossplane crossplane \
     --repo https://charts.crossplane.io/stable \
     --namespace crossplane-system --create-namespace --wait
 
-kubectl apply --filename dean/packages/function-tag-manager.yaml
-
-kubectl apply --filename providers/dot-kubernetes.yaml
-
-kubectl apply --filename providers/dot-sql.yaml
-
-kubectl apply --filename providers/dot-app.yaml
+# Apply all required packages
+kubectl apply -f dean/packages/runtimeconfig-provider-aws.yaml
+kubectl apply -f dean/packages/provider-aws.yaml
+kubectl apply -f dean/packages/function-tag-manager.yaml
+kubectl apply -f dean/packages/function-go-templating.yaml
+kubectl apply -f dean/packages/function-patch-and-transform.yaml
+kubectl apply -f dean/packages/function-auto-ready.yaml
+kubectl apply -f dean/packages/provider-helm-incluster.yaml
+kubectl apply -f dean/packages/provider-kubernetes-incluster.yaml
 
 gum spin --spinner dot \
     --title "Waiting for Crossplane providers..." -- sleep 60
@@ -171,7 +174,7 @@ aws_secret_access_key = $AWS_SECRET_ACCESS_KEY
         --from-file creds=./aws-creds.conf \
         --dry-run=client -o yaml | kubectl apply -f -
 
-    kubectl apply --filename providers/aws-config.yaml
+    kubectl apply --filename dean/packages/aws-config.yaml
 
 else
 

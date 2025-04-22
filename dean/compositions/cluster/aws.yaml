@@ -11,13 +11,25 @@ spec:
     kind: CompositeCluster
   mode: Pipeline
   pipeline:
-  - functionRef:
-      name: crossplane-contrib-function-patch-and-transform
+  - step: inject-tags
+    functionRef:
+      name: function-tag-manager
+    input:
+      apiVersion: tag-manager.fn.crossplane.io/v1beta1
+      kind: ManagedTags
+      addTags:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.tags
+          policy: Merge    
+  - step: patch-and-transform
+    functionRef:
+      name: function-patch-and-transform
     input:
       apiVersion: pt.fn.crossplane.io/v1beta1
       kind: Resources
       resources:
-      - base:
+      - name: ekscluster
+        base:
           apiVersion: eks.aws.upbound.io/v1beta1
           kind: Cluster
           spec:
@@ -31,7 +43,6 @@ spec:
                 endpointPublicAccess: true
                 subnetIdSelector:
                   matchControllerRef: true
-        name: ekscluster
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -50,7 +61,8 @@ spec:
         - fromFieldPath: status.conditions[0].reason
           toFieldPath: status.controlPlaneStatus
           type: ToCompositeFieldPath
-      - base:
+      - name: clusterAuth
+        base:
           apiVersion: eks.aws.upbound.io/v1beta1
           kind: ClusterAuth
           spec:
@@ -62,7 +74,6 @@ spec:
         - fromConnectionSecretKey: kubeconfig
           name: kubeconfig
           type: FromConnectionSecretKey
-        name: clusterAuth
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -75,7 +86,8 @@ spec:
             type: string
         - fromFieldPath: spec.claimRef.namespace
           toFieldPath: spec.writeConnectionSecretToRef.namespace
-      - base:
+      - name: eksnodegroup
+        base:
           apiVersion: eks.aws.upbound.io/v1beta1
           kind: NodeGroup
           spec:
@@ -93,7 +105,6 @@ spec:
                 minSize: 1
               subnetIdSelector:
                 matchControllerRef: true
-        name: eksnodegroup
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -119,7 +130,8 @@ spec:
         - fromFieldPath: status.conditions[0].reason
           toFieldPath: status.nodePoolStatus
           type: ToCompositeFieldPath
-      - base:
+      - name: iamrole-controlplane
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: Role
           spec:
@@ -133,8 +145,9 @@ spec:
                     "Action": ["sts:AssumeRole"]
                   }]
                 }
-        name: iamrole-controlplane
         patches:
+        - fromFieldPath: spec.parameters.tags
+          toFieldPath: spec.forProvider.tags
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
           transforms:
@@ -149,7 +162,8 @@ spec:
               fmt: '%s-controlplane'
               type: Format
             type: string
-      - base:
+      - name: iamrole-nodegroup
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: Role
           spec:
@@ -163,8 +177,9 @@ spec:
                     "Action": ["sts:AssumeRole"]
                   }]
                 }
-        name: iamrole-nodegroup
         patches:
+        - fromFieldPath: spec.parameters.tags
+          toFieldPath: spec.forProvider.tags        
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
           transforms:
@@ -179,15 +194,15 @@ spec:
               fmt: '%s-nodegroup'
               type: Format
             type: string
-      - base:
+      - name: iamattachment-controlplane
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
               policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
               roleSelector:
-                matchControllerRef: true
-        name: iamattachment-controlplane
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -203,15 +218,15 @@ spec:
               fmt: '%s-controlplane'
               type: Format
             type: string
-      - base:
+      - name: iamattachment-service
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
               policyArn: arn:aws:iam::aws:policy/AmazonEKSServicePolicy
               roleSelector:
-                matchControllerRef: true
-        name: iamattachment-service
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -227,7 +242,8 @@ spec:
               fmt: '%s-controlplane'
               type: Format
             type: string
-      - base:
+      - name: iamattachment-worker
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
@@ -235,7 +251,6 @@ spec:
               policyArn: arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
               roleSelector:
                 matchControllerRef: true
-        name: iamattachment-worker
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -251,15 +266,15 @@ spec:
               fmt: '%s-nodegroup'
               type: Format
             type: string
-      - base:
+      - name: iamattachment-cni
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
               policyArn: arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
               roleSelector:
-                matchControllerRef: true
-        name: iamattachment-cni
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -275,15 +290,15 @@ spec:
               fmt: '%s-nodegroup'
               type: Format
             type: string
-      - base:
+      - name: iamattachment-registry
+        base:
           apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
               policyArn: arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
               roleSelector:
-                matchControllerRef: true
-        name: iamattachment-registry
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -299,19 +314,20 @@ spec:
               fmt: '%s-nodegroup'
               type: Format
             type: string
-      - base:
+      - name: vpc-nodepool
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: VPC
           spec:
             forProvider:
               cidrBlock: 10.0.0.0/16
               enableDnsSupport: true
-              region: us-east-1
-        name: vpc-nodepool
+              region: us-east-1        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
-      - base:
+      - name: sg-nodepool
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: SecurityGroup
           spec:
@@ -319,8 +335,7 @@ spec:
               description: Cluster communication with worker nodes
               region: us-east-1
               vpcIdSelector:
-                matchControllerRef: true
-        name: sg-nodepool
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -328,7 +343,8 @@ spec:
           toFieldPath: spec.forProvider.name
         readinessChecks:
         - type: None
-      - base:
+      - name: securityGroupRule
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: SecurityGroupRule
           spec:
@@ -342,12 +358,12 @@ spec:
               securityGroupIdSelector:
                 matchControllerRef: true
               toPort: 0
-              type: egress
-        name: securityGroupRule
+              type: egress        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
-      - base:
+      - name: subnet-nodepool-1a
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Subnet
           metadata:
@@ -363,8 +379,7 @@ spec:
               tags:
                 kubernetes.io/role/elb: "1"
               vpcIdSelector:
-                matchControllerRef: true
-        name: subnet-nodepool-1a
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -373,7 +388,8 @@ spec:
               fmt: '%s-1a'
               type: Format
             type: string
-      - base:
+      - name: subnet-nodepool-1b
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Subnet
           metadata:
@@ -389,8 +405,7 @@ spec:
               tags:
                 kubernetes.io/role/elb: "1"
               vpcIdSelector:
-                matchControllerRef: true
-        name: subnet-nodepool-1b
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -399,7 +414,8 @@ spec:
               fmt: '%s-1b'
               type: Format
             type: string
-      - base:
+      - name: subnet-nodepool-1c
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Subnet
           metadata:
@@ -415,8 +431,7 @@ spec:
               tags:
                 kubernetes.io/role/elb: "1"
               vpcIdSelector:
-                matchControllerRef: true
-        name: subnet-nodepool-1c
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -425,19 +440,20 @@ spec:
               fmt: '%s-1c'
               type: Format
             type: string
-      - base:
+      - name: gateway
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: InternetGateway
           spec:
             forProvider:
               region: us-east-1
               vpcIdSelector:
-                matchControllerRef: true
-        name: gateway
+                matchControllerRef: true        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
-      - base:
+      - name: routeTable
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTable
           spec:
@@ -445,11 +461,11 @@ spec:
               region: us-east-1
               vpcIdSelector:
                 matchControllerRef: true
-        name: routeTable
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
-      - base:
+      - name: route
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Route
           spec:
@@ -460,11 +476,11 @@ spec:
               region: us-east-1
               routeTableIdSelector:
                 matchControllerRef: true
-        name: route
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
-      - base:
+      - name: mainRouteTableAssociation
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: MainRouteTableAssociation
           spec:
@@ -474,11 +490,11 @@ spec:
                 matchControllerRef: true
               vpcIdSelector:
                 matchControllerRef: true
-        name: mainRouteTableAssociation
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
-      - base:
+      - name: routeTableAssociation1a
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTableAssociation
           spec:
@@ -491,7 +507,6 @@ spec:
                 matchLabels:
                   access: public
                   zone: us-east-1a
-        name: routeTableAssociation1a
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -500,7 +515,8 @@ spec:
               fmt: '%s-1a'
               type: Format
             type: string
-      - base:
+      - name: routeTableAssociation1b
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTableAssociation
           spec:
@@ -512,8 +528,7 @@ spec:
                 matchControllerRef: true
                 matchLabels:
                   access: public
-                  zone: us-east-1b
-        name: routeTableAssociation1b
+                  zone: us-east-1b        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -522,7 +537,8 @@ spec:
               fmt: '%s-1b'
               type: Format
             type: string
-      - base:
+      - name: routeTableAssociation1c
+        base:
           apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTableAssociation
           spec:
@@ -535,7 +551,6 @@ spec:
                 matchLabels:
                   access: public
                   zone: us-east-1c
-        name: routeTableAssociation1c
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -544,7 +559,8 @@ spec:
               fmt: '%s-1c'
               type: Format
             type: string
-      - base:
+      - name: addonEbs
+        base:
           apiVersion: eks.aws.upbound.io/v1beta1
           kind: Addon
           metadata:
@@ -554,8 +570,7 @@ spec:
               addonName: aws-ebs-csi-driver
               clusterNameSelector:
                 matchControllerRef: true
-              region: us-east-1
-        name: addonEbs
+              region: us-east-1        
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -564,7 +579,8 @@ spec:
               fmt: '%s-ebs'
               type: Format
             type: string
-      - base:
+      - name: helm
+        base:
           apiVersion: helm.crossplane.io/v1beta1
           kind: ProviderConfig
           spec:
@@ -574,7 +590,6 @@ spec:
                 name: kubeconfig
                 namespace: crossplane-system
               source: Secret
-        name: helm
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -589,13 +604,13 @@ spec:
             type: string
         readinessChecks:
         - type: None
-      - base:
+      - name: helm-local
+        base:
           apiVersion: helm.crossplane.io/v1beta1
           kind: ProviderConfig
           spec:
             credentials:
               source: InjectedIdentity
-        name: helm-local
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -608,7 +623,8 @@ spec:
           toFieldPath: metadata.annotations
         readinessChecks:
         - type: None
-      - base:
+      - name: kubernetes
+        base:
           apiVersion: kubernetes.crossplane.io/v1alpha1
           kind: ProviderConfig
           spec:
@@ -618,7 +634,6 @@ spec:
                 name: kubeconfig
                 namespace: crossplane-system
               source: Secret
-        name: kubernetes
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -633,19 +648,9 @@ spec:
             type: string
         readinessChecks:
         - type: None
-    step: patch-and-transform
-  - functionRef:
-      name: crossplane-contrib-function-tag-manager
-    input:
-      apiVersion: tag-manager.fn.crossplane.io/v1beta1
-      kind: ManagedTags
-      addTags:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.tags
-          policy: Merge
-    step: inject-tags
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: app-crossplane
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -675,9 +680,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: app-crossplane
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: app-openfunction
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -709,9 +714,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: app-openfunction
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: app-dapr
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -741,9 +746,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: app-dapr
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: app-traefik
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -773,9 +778,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: app-traefik
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: app-dynatrace
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -876,9 +881,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: app-dynatrace
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: app-external-secrets
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -909,10 +914,10 @@ spec:
               name: '{{ $.observed.composite.resource.spec.id }}'
           {{ end }}
       kind: GoTemplate
-      source: Inline
-    step: app-external-secrets
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+      source: Inline    
+  - step: secret-store
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -952,10 +957,10 @@ spec:
               name: {{ $.observed.composite.resource.spec.id }}
           {{ end }}
       kind: GoTemplate
-      source: Inline
-    step: secret-store
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+      source: Inline    
+  - step: secrets
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -995,9 +1000,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: secrets
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: namespaces
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -1023,9 +1028,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: namespaces
-  - functionRef:
-      name: crossplane-contrib-function-go-templating
+  - step: creds
+    functionRef:
+      name: function-go-templating
     input:
       apiVersion: gotemplating.fn.crossplane.io/v1beta1
       inline:
@@ -1062,10 +1067,9 @@ spec:
           {{ end }}
       kind: GoTemplate
       source: Inline
-    step: creds
-  - functionRef:
-      name: crossplane-contrib-function-auto-ready
-    step: automatically-detect-ready-composed-resources
+  - step: automatically-detect-ready-composed-resources
+    functionRef:
+      name: function-auto-ready
   publishConnectionDetailsWithStoreConfigRef:
     name: default
   writeConnectionSecretsToNamespace: crossplane-system

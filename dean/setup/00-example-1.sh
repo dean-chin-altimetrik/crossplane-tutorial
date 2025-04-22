@@ -62,6 +62,10 @@ kubectl apply -f dean/packages/function-auto-ready.yaml
 kubectl apply -f dean/packages/provider-helm-incluster.yaml
 kubectl apply -f dean/packages/provider-kubernetes-incluster.yaml
 
+# Apply all required compositions
+kubectl apply -f dean/compositions/cluster/definition.yaml
+kubectl apply -f dean/compositions/cluster/aws.yaml
+
 gum spin --spinner dot \
     --title "Waiting for Crossplane providers..." -- sleep 60
 

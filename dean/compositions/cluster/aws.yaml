@@ -149,8 +149,6 @@ spec:
                 }
               tags: {}                
         patches:
-        - fromFieldPath: spec.parameters.tags
-          toFieldPath: spec.forProvider.tags
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
           transforms:
@@ -182,8 +180,6 @@ spec:
                 }
               tags: {}                
         patches:
-        - fromFieldPath: spec.parameters.tags
-          toFieldPath: spec.forProvider.tags        
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
           transforms:
@@ -341,7 +337,6 @@ spec:
               region: us-east-1
               vpcIdSelector:
                 matchControllerRef: true  
-            tags: {}                      
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name

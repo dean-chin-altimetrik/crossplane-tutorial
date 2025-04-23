@@ -8,3 +8,4 @@
 /bin
 /kubeconfig.yaml
 .reverse-engineer
+.DS_Store

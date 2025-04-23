@@ -40,6 +40,10 @@ How to use:
 kubectl neat get composition cluster-aws -o yaml | kubectl-neat  > composition-cluster-aws.yaml
 ```
 
+### Crossplane Render - Composition Testing
+
+https://blog.upbound.io/composition-testing-patterns-rendering
+
 ## Gotchas
 
 Here is a list of gocthas that I discovered when using crossplane.

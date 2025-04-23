@@ -10,7 +10,30 @@ spec:
     apiVersion: altimetrik.com/v1alpha1
     kind: CompositeCluster
   mode: Pipeline
-  pipeline:  
+  pipeline:
+  - step: vpc
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: VPC
+          metadata:
+            name: {{ .observed.composite.resource.metadata.name }}-vpc
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: '{{ $.observed.composite.resource.spec.id }}-vpc'            
+          spec:
+            forProvider:
+              cidrBlock: 10.0.0.0/16
+              enableDnsSupport: true
+              region: us-east-1
+              tags:
+                Name: {{ .observed.composite.resource.metadata.name }}-vpc
   - step: patch-and-transform
     functionRef:
       name: function-patch-and-transform
@@ -304,18 +327,6 @@ spec:
               fmt: '%s-nodegroup'
               type: Format
             type: string
-      - name: vpc-nodepool
-        base:
-          apiVersion: ec2.aws.upbound.io/v1beta1
-          kind: VPC
-          spec:
-            forProvider:
-              cidrBlock: 10.0.0.0/16
-              enableDnsSupport: true
-              region: us-east-1
-        patches:
-        - fromFieldPath: spec.id
-          toFieldPath: metadata.name
       - name: sg-nodepool
         base:
           apiVersion: ec2.aws.upbound.io/v1beta1

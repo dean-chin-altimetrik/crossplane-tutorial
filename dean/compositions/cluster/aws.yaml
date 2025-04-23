@@ -10,17 +10,7 @@ spec:
     apiVersion: altimetrik.com/v1alpha1
     kind: CompositeCluster
   mode: Pipeline
-  pipeline:
-  - step: inject-tags
-    functionRef:
-      name: function-tag-manager
-    input:
-      apiVersion: tag-manager.fn.crossplane.io/v1beta1
-      kind: ManagedTags
-      addTags:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.tags
-          policy: Merge    
+  pipeline:  
   - step: patch-and-transform
     functionRef:
       name: function-patch-and-transform
@@ -1072,6 +1062,16 @@ spec:
   - step: automatically-detect-ready-composed-resources
     functionRef:
       name: function-auto-ready
+  - step: inject-tags
+    functionRef:
+      name: function-tag-manager
+    input:
+      apiVersion: tag-manager.fn.crossplane.io/v1beta1
+      kind: ManagedTags
+      addTags:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.tags
+          policy: Merge  
   publishConnectionDetailsWithStoreConfigRef:
     name: default
   writeConnectionSecretsToNamespace: crossplane-system

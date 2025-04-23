@@ -30,7 +30,7 @@ spec:
       resources:
       - name: ekscluster
         base:
-          apiVersion: eks.aws.crossplane.io/v1beta1
+          apiVersion: eks.aws.upbound.io/v1beta1
           kind: Cluster
           spec:
             forProvider:
@@ -63,7 +63,7 @@ spec:
           type: ToCompositeFieldPath
       - name: clusterAuth
         base:
-          apiVersion: eks.aws.crossplane.io/v1beta1
+          apiVersion: eks.aws.upbound.io/v1beta1
           kind: ClusterAuth
           spec:
             forProvider:
@@ -88,7 +88,7 @@ spec:
           toFieldPath: spec.writeConnectionSecretToRef.namespace
       - name: eksnodegroup
         base:
-          apiVersion: eks.aws.crossplane.io/v1beta1
+          apiVersion: eks.aws.upbound.io/v1beta1
           kind: NodeGroup
           spec:
             forProvider:
@@ -132,7 +132,7 @@ spec:
           type: ToCompositeFieldPath
       - name: iamrole-controlplane
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: Role
           spec:
             forProvider:
@@ -164,7 +164,7 @@ spec:
             type: string
       - name: iamrole-nodegroup
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: Role
           spec:
             forProvider:
@@ -196,7 +196,7 @@ spec:
             type: string
       - name: iamattachment-controlplane
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
@@ -220,7 +220,7 @@ spec:
             type: string
       - name: iamattachment-service
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
@@ -244,7 +244,7 @@ spec:
             type: string
       - name: iamattachment-worker
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
@@ -268,7 +268,7 @@ spec:
             type: string
       - name: iamattachment-cni
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
@@ -292,7 +292,7 @@ spec:
             type: string
       - name: iamattachment-registry
         base:
-          apiVersion: iam.aws.crossplane.io/v1beta1
+          apiVersion: iam.aws.upbound.io/v1beta1
           kind: RolePolicyAttachment
           spec:
             forProvider:
@@ -316,7 +316,7 @@ spec:
             type: string
       - name: vpc-nodepool
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: VPC
           spec:
             forProvider:
@@ -328,7 +328,7 @@ spec:
           toFieldPath: metadata.name
       - name: sg-nodepool
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: SecurityGroup
           spec:
             forProvider:
@@ -345,7 +345,7 @@ spec:
         - type: None
       - name: securityGroupRule
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: SecurityGroupRule
           spec:
             forProvider:
@@ -364,7 +364,7 @@ spec:
           toFieldPath: metadata.name
       - name: subnet-nodepool-1a
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Subnet
           metadata:
             labels:
@@ -390,7 +390,7 @@ spec:
             type: string
       - name: subnet-nodepool-1b
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Subnet
           metadata:
             labels:
@@ -416,7 +416,7 @@ spec:
             type: string
       - name: subnet-nodepool-1c
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Subnet
           metadata:
             labels:
@@ -442,7 +442,7 @@ spec:
             type: string
       - name: gateway
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: InternetGateway
           spec:
             forProvider:
@@ -454,7 +454,7 @@ spec:
           toFieldPath: metadata.name
       - name: routeTable
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTable
           spec:
             forProvider:
@@ -466,7 +466,7 @@ spec:
           toFieldPath: metadata.name
       - name: route
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: Route
           spec:
             forProvider:
@@ -481,7 +481,7 @@ spec:
           toFieldPath: metadata.name
       - name: mainRouteTableAssociation
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: MainRouteTableAssociation
           spec:
             forProvider:
@@ -495,7 +495,7 @@ spec:
           toFieldPath: metadata.name
       - name: routeTableAssociation1a
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTableAssociation
           spec:
             forProvider:
@@ -517,7 +517,7 @@ spec:
             type: string
       - name: routeTableAssociation1b
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTableAssociation
           spec:
             forProvider:
@@ -539,7 +539,7 @@ spec:
             type: string
       - name: routeTableAssociation1c
         base:
-          apiVersion: ec2.aws.crossplane.io/v1beta1
+          apiVersion: ec2.aws.upbound.io/v1beta1
           kind: RouteTableAssociation
           spec:
             forProvider:
@@ -561,7 +561,7 @@ spec:
             type: string
       - name: addonEbs
         base:
-          apiVersion: eks.aws.crossplane.io/v1beta1
+          apiVersion: eks.aws.upbound.io/v1beta1
           kind: Addon
           metadata:
             name: aws-ebs-csi-driver

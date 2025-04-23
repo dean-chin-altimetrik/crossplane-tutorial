@@ -313,10 +313,19 @@ spec:
               cidrBlock: 10.0.0.0/16
               enableDnsSupport: true
               region: us-east-1
-              tags: {}        
+              tags:
+              - key: Name
+                value: ""
         patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
+        - fromFieldPath: "metadata.name"
+          toFieldPath: "spec.forProvider.tags[0].value"
+          transforms:
+          - type: string
+            string:
+              fmt: "%s-vpc"
+              type: Format
       - name: sg-nodepool
         base:
           apiVersion: ec2.aws.upbound.io/v1beta1

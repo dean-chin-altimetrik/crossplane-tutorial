@@ -44,4 +44,4 @@ kubectl neat get composition cluster-aws -o yaml | kubectl-neat  > composition-c
 
 Here is a list of gocthas that I discovered when using crossplane.
 
-- Sometimes VPC does not delete cleanly because GuardDuty automatically injects a SecurityGroup to the VPC and it is not managed by Crossplane so it cannot delete. For now, I have to go in and delete it manually. Once I delete the security group, it will 
+- Sometimes VPC does not delete cleanly because GuardDuty automatically injects a SecurityGroup to the VPC and it is not managed by Crossplane so it cannot delete. For now, I have to go in and delete it manually. Once I delete the security group, the VPC automatically deletes successfully.

@@ -274,3 +274,11 @@ helm upgrade --install argocd argo-cd \
     --values argocd/helm-values.yaml --wait
 
 kubectl apply --filename argocd/apps.yaml
+
+sleep 5 
+
+# copy and commit example
+cp dean/examples/00-example-1.yaml a-team/intro.yaml
+git add .
+git commit -m "Intro"
+git push
